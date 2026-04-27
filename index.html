@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Häfte</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1916;
+    --surface2: #242220;
+    --border: #2e2c29;
+    --accent: #e8c547;
+    --accent2: #c9a82c;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --danger: #d44f3a;
+    --success: #4caf7d;
+    --radius: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { font-weight: 700; font-style: italic; }
+  .header-meta { margin-left: auto; color: var(--muted); font-size: 11px; }
+
+  .app {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    flex: 1;
+    min-height: 0;
+    height: calc(100vh - 61px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .sidebar-title {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 22px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(232,197,71,0.04);
+  }
+
+  .upload-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon { font-size: 26px; margin-bottom: 8px; opacity: 0.5; }
+
+  .upload-label { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .upload-label strong { color: var(--accent); }
+
+  .progress-wrap { margin-top: 10px; }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .progress-bar.active { display: block; }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.2s;
+  }
+
+  .progress-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 5px;
+    min-height: 14px;
+    text-align: center;
+  }
+
+  .file-count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .file-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+  }
+
+  .file-item:hover { background: var(--surface2); border-color: var(--border); }
+
+  .file-icon { font-size: 16px; flex-shrink: 0; }
+
+  .file-info { flex: 1; min-width: 0; }
+
+  .file-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .file-pages { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .file-remove {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+  }
+
+  .file-item:hover .file-remove { opacity: 1; }
+  .file-remove:hover { color: var(--danger); }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .toolbar-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 13px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--border); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-danger { border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: rgba(212,79,58,0.1); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f0e0c;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .page-count-info { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .page-count-info strong { color: var(--accent); }
+
+  .page-canvas {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+    gap: 12px;
+    min-height: 400px;
+  }
+
+  .empty-icon { font-size: 48px; opacity: 0.25; }
+
+  .empty-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--text);
+    opacity: 0.35;
+  }
+
+  .empty-sub { font-size: 11px; opacity: 0.4; }
+
+  .pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+  }
+
+  .page-card {
+    position: relative;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: grab;
+    background: var(--surface);
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    user-select: none;
+  }
+
+  .page-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .page-card.dragging { opacity: 0.35; transform: scale(0.97); cursor: grabbing; }
+  .page-card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .page-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(232,197,71,0.25); }
+
+  .page-thumb-wrap {
+    width: 100%;
+    aspect-ratio: 0.707;
+    position: relative;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+
+  .page-thumb-wrap canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  .page-thumb-placeholder {
+    width: 100%;
+    aspect-ratio: 0.707;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 20px;
+  }
+
+  .page-footer {
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  .page-num { font-size: 10px; color: var(--muted); }
+
+  .page-source {
+    font-size: 9px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70px;
+  }
+
+  .page-delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0,0,0,0.75);
+    border: 1px solid rgba(212,79,58,0.5);
+    color: var(--danger);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .page-card:hover .page-delete { opacity: 1; }
+  .page-delete:hover { background: rgba(212,79,58,0.25); }
+
+  .page-number-badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 10px;
+  }
+
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 11px 16px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    min-width: 200px;
+    animation: slideIn 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.success { border-color: var(--success); }
+  .toast.error { border-color: var(--danger); }
+  .toast.info { border-color: var(--accent); }
+
+  @keyframes slideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,14,12,0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    gap: 16px;
+    backdrop-filter: blur(4px);
+  }
+
+  .loading-overlay.active { display: flex; }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 13px; color: var(--muted); }
+  .loading-sub { font-size: 11px; color: var(--muted); opacity: 0.6; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">PDF <span>Häfte</span></div>
+  <div class="header-meta">Ladda upp · Sortera · Exportera — allt i webbläsaren</div>
+</header>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">PDF-filer</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".pdf" multiple>
+        <div class="upload-icon">📄</div>
+        <div class="upload-label">
+          <strong>Klicka eller dra PDF-filer hit</strong><br>
+          Max 30 filer · Bearbetas lokalt
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-label" id="progressLabel"></div>
+        </div>
+      </div>
+      <div class="file-count-badge" id="fileCountBadge">0 / 30 filer uppladdade</div>
+    </div>
+    <div class="file-list" id="fileList"></div>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar">
+      <span class="toolbar-label">Välj</span>
+      <button class="btn" onclick="selectAll()">Alla</button>
+      <button class="btn" onclick="selectNone()">Ingen</button>
+      <button class="btn btn-danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>Radera markerade</button>
+      <span class="page-count-info">
+        Totalt <strong id="totalPageCount">0</strong> sidor
+      </span>
+      <button class="btn btn-primary" id="generateBtn" onclick="generatePdf()" disabled>
+        ⬇ Ladda ner häfte
+      </button>
+    </div>
+
+    <div class="page-canvas" id="pageCanvas">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📂</div>
+        <div class="empty-title">Inga sidor ännu</div>
+        <div class="empty-sub">Ladda upp PDF-filer i panelen till vänster</div>
+      </div>
+      <div class="pages-grid" id="pagesGrid" style="display:none;"></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Bearbetar...</div>
+  <div class="loading-sub" id="loadingSub"></div>
+</div>
+
+<!-- pdf-lib for merging/exporting -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<!-- PDF.js for rendering thumbnails -->
+<script>
+window.pdfjsLib = null;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// Set up PDF.js worker
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+const state = {
+  files: [],   // { id, filename, pageCount, pdfDoc (pdf-lib), pdfJsDoc }
+  pages: [],   // { fileId, filename, pageIndex, canvas }
+  selected: new Set(),
+  dragSrcIndex: null,
+};
+
+let fileCounter = 0;
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function toast(msg, type = 'info', duration = 3500) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { info: 'ℹ', success: '✓', error: '✕' };
+  t.innerHTML = `<span>${icons[type]}</span> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
+
+function showLoading(text = 'Bearbetar...', sub = '') {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loadingSub').textContent = sub;
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+function setProgress(pct, label = '') {
+  const bar = document.getElementById('progressBar');
+  const fill = document.getElementById('progressFill');
+  const lbl = document.getElementById('progressLabel');
+  bar.classList.toggle('active', pct > 0 && pct < 100);
+  fill.style.width = pct + '%';
+  lbl.textContent = label;
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────────
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', e => { if (!uploadZone.contains(e.relatedTarget)) uploadZone.classList.remove('drag-over'); });
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  handleFiles(Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf'));
+});
+fileInput.addEventListener('change', () => {
+  handleFiles(Array.from(fileInput.files));
+  fileInput.value = '';
+});
+
+async function handleFiles(files) {
+  if (!files.length) return;
+  const remaining = 30 - state.files.length;
+  if (remaining <= 0) { toast('Max 30 filer!', 'error'); return; }
+  files = files.slice(0, remaining);
+
+  for (let i = 0; i < files.length; i++) {
+    setProgress(Math.round((i / files.length) * 90), `Laddar ${i + 1} / ${files.length}: ${files[i].name}`);
+    await processFile(files[i]);
+  }
+
+  setProgress(100, '');
+  setTimeout(() => setProgress(0, ''), 800);
+}
+
+async function processFile(file) {
+  showLoading(`Läser in ${file.name}…`, 'Genererar förhandsvisningar');
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+
+    // Load with pdf-lib (for later export)
+    const pdfLibDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+
+    // Load with PDF.js (for rendering thumbnails)
+    const pdfJsDoc = await pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
+
+    const pageCount = pdfLibDoc.getPageCount();
+    const id = 'f' + (++fileCounter);
+
+    state.files.push({ id, filename: file.name, pageCount, pdfLibDoc, pdfJsDoc });
+
+    // Render each page thumbnail
+    for (let i = 0; i < pageCount; i++) {
+      showLoading(`${file.name}`, `Renderar sida ${i + 1} / ${pageCount}`);
+      const canvas = await renderPageThumbnail(pdfJsDoc, i);
+      state.pages.push({ fileId: id, filename: file.name, pageIndex: i, canvas });
+    }
+
+    toast(`${file.name} — ${pageCount} sidor`, 'success');
+    renderFileList();
+    renderPages();
+  } catch (err) {
+    console.error(err);
+    toast(`Fel med ${file.name}: ${err.message}`, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function renderPageThumbnail(pdfJsDoc, pageIndex) {
+  const page = await pdfJsDoc.getPage(pageIndex + 1);
+  const viewport = page.getViewport({ scale: 0.5 });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  return canvas;
+}
+
+// ── File List ──────────────────────────────────────────────────────────────
+function renderFileList() {
+  const el = document.getElementById('fileList');
+  el.innerHTML = '';
+  document.getElementById('fileCountBadge').textContent = `${state.files.length} / 30 filer uppladdade`;
+
+  state.files.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.innerHTML = `
+      <div class="file-icon">📄</div>
+      <div class="file-info">
+        <div class="file-name" title="${f.filename}">${f.filename}</div>
+        <div class="file-pages">${f.pageCount} sidor</div>
+      </div>
+      <button class="file-remove" title="Ta bort fil" onclick="removeFile('${f.id}', event)">✕</button>
+    `;
+    el.appendChild(item);
+  });
+}
+
+function removeFile(fileId, e) {
+  e.stopPropagation();
+  state.files = state.files.filter(f => f.id !== fileId);
+  state.pages = state.pages.filter(p => p.fileId !== fileId);
+  state.selected.clear();
+  renderFileList();
+  renderPages();
+  toast('Fil borttagen', 'info');
+}
+
+// ── Page Grid ──────────────────────────────────────────────────────────────
+function renderPages() {
+  const grid = document.getElementById('pagesGrid');
+  const empty = document.getElementById('emptyState');
+
+  document.getElementById('totalPageCount').textContent = state.pages.length;
+  document.getElementById('generateBtn').disabled = state.pages.length === 0;
+  document.getElementById('deleteSelectedBtn').disabled = state.selected.size === 0;
+
+  if (state.pages.length === 0) {
+    grid.style.display = 'none';
+    empty.style.display = 'flex';
+    return;
+  }
+
+  grid.style.display = 'grid';
+  empty.style.display = 'none';
+  grid.innerHTML = '';
+
+  state.pages.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'page-card' + (state.selected.has(i) ? ' selected' : '');
+    card.draggable = true;
+    card.dataset.index = i;
+
+    const shortName = p.filename.length > 14 ? p.filename.slice(0, 12) + '…' : p.filename;
+
+    card.innerHTML = `
+      <div class="page-thumb-wrap" id="thumb-wrap-${i}"></div>
+      <div class="page-number-badge">${i + 1}</div>
+      <button class="page-delete" title="Ta bort sida" onclick="deletePage(${i}, event)">✕</button>
+      <div class="page-footer">
+        <span class="page-num">Sid ${p.pageIndex + 1}</span>
+        <span class="page-source">${shortName}</span>
+      </div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('page-delete')) return;
+      toggleSelect(i);
+    });
+
+    card.addEventListener('dragstart', (e) => {
+      state.dragSrcIndex = i;
+      setTimeout(() => card.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.page-card').forEach(c => c.classList.remove('drag-over'));
+    });
+
+    card.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.page-card').forEach(c => c.classList.remove('drag-over'));
+      card.classList.add('drag-over');
+    });
+
+    card.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const src = state.dragSrcIndex;
+      const dst = parseInt(card.dataset.index);
+      if (src === null || src === dst) return;
+      const moved = state.pages.splice(src, 1)[0];
+      state.pages.splice(dst, 0, moved);
+      state.selected.clear();
+      state.dragSrcIndex = null;
+      renderPages();
+    });
+
+    grid.appendChild(card);
+
+    // Insert pre-rendered canvas thumbnail
+    const wrap = document.getElementById(`thumb-wrap-${i}`);
+    if (p.canvas) {
+      const clone = p.canvas.cloneNode(false);
+      const ctx = clone.getContext('2d');
+      clone.width = p.canvas.width;
+      clone.height = p.canvas.height;
+      ctx.drawImage(p.canvas, 0, 0);
+      clone.style.width = '100%';
+      clone.style.height = '100%';
+      clone.style.display = 'block';
+      wrap.appendChild(clone);
+    } else {
+      wrap.innerHTML = '<div class="page-thumb-placeholder">📄</div>';
+    }
+  });
+}
+
+function toggleSelect(i) {
+  if (state.selected.has(i)) state.selected.delete(i);
+  else state.selected.add(i);
+  renderPages();
+}
+
+function selectAll() {
+  state.pages.forEach((_, i) => state.selected.add(i));
+  renderPages();
+}
+
+function selectNone() {
+  state.selected.clear();
+  renderPages();
+}
+
+function deletePage(i, e) {
+  e.stopPropagation();
+  state.pages.splice(i, 1);
+  state.selected.clear();
+  renderPages();
+  toast('Sida borttagen', 'info');
+}
+
+function deleteSelected() {
+  if (!state.selected.size) return;
+  const indices = Array.from(state.selected).sort((a, b) => b - a);
+  indices.forEach(i => state.pages.splice(i, 1));
+  state.selected.clear();
+  renderPages();
+  toast(`${indices.length} sidor borttagna`, 'info');
+}
+
+// ── Generate PDF ───────────────────────────────────────────────────────────
+async function generatePdf() {
+  if (!state.pages.length) return;
+  showLoading('Skapar häfte…', `Kombinerar ${state.pages.length} sidor`);
+
+  try {
+    const outputDoc = await PDFLib.PDFDocument.create();
+
+    for (let i = 0; i < state.pages.length; i++) {
+      const p = state.pages[i];
+      document.getElementById('loadingSub').textContent = `Sida ${i + 1} / ${state.pages.length}`;
+
+      const file = state.files.find(f => f.id === p.fileId);
+      if (!file) continue;
+
+      const [copiedPage] = await outputDoc.copyPages(file.pdfLibDoc, [p.pageIndex]);
+      outputDoc.addPage(copiedPage);
+    }
+
+    const pdfBytes = await outputDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hafte.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    hideLoading();
+    toast(`Häfte med ${state.pages.length} sidor nedladdat!`, 'success', 5000);
+  } catch (err) {
+    hideLoading();
+    console.error(err);
+    toast('Fel vid generering: ' + err.message, 'error', 6000);
+  }
+}
+</script>
+</body>
+</html>
