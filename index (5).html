@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — PDF Booklet</title>
+<link rel="alternate" hreflang="en" href="/en/about.html">
+<link rel="alternate" hreflang="sv" href="/sv/about.html">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+
+<header>
+  <a href="/en/" class="logo">PDF <span>Booklet</span></a>
+  <nav>
+    <a href="/en/about.html" class="active">About</a>
+    <a href="/en/policy.html">Policy</a>
+    <a href="/en/contact.html">Contact</a>
+    <div class="lang-dropdown" id="langDrop">
+      <button class="lang-btn" onclick="toggleLang()">🌐 EN <span class="arrow">▾</span></button>
+      <div class="lang-menu">
+        <a href="/sv/about.html">🇸🇪 Svenska</a>
+        <a href="/en/about.html" class="current">🇬🇧 English</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="page-content">
+  <div class="page-label">About us</div>
+  <h1 class="page-title">We make PDF <em>editing</em><br>simple</h1>
+  <div class="divider"></div>
+  <div class="page-body">
+
+    <!-- ✏️ WRITE YOUR TEXT HERE -->
+    <p>
+      Write your text here. This is a sample paragraph you can replace with
+      your own content about the company, the service, or your story.
+    </p>
+    <p>
+      Add more paragraphs by copying a <code>&lt;p&gt;...&lt;/p&gt;</code> line
+      and writing your text inside. You can use <strong>bold</strong> to
+      highlight words or <a href="/en/contact.html">link to other pages</a>.
+    </p>
+    <p>
+      A third paragraph if you want more content. Edit, remove, or
+      add as many paragraphs as you like.
+    </p>
+    <!-- ✏️ END -->
+
+  </div>
+</div>
+
+<footer>
+  <a href="/en/" class="footer-logo">PDF <span>Booklet</span></a>
+  <span class="footer-copy">© 2025</span>
+  <div class="footer-links">
+    <a href="/en/about.html">About</a>
+    <a href="/en/policy.html">Policy</a>
+    <a href="/en/contact.html">Contact</a>
+  </div>
+</footer>
+
+<script>
+function toggleLang(){ document.getElementById('langDrop').classList.toggle('open'); }
+document.addEventListener('click',function(e){ if(!document.getElementById('langDrop').contains(e.target)) document.getElementById('langDrop').classList.remove('open'); });
+</script>
+</body>
+</html>

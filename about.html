@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — PDF Häfte</title>
+<link rel="alternate" hreflang="en" href="/en/contact.html">
+<link rel="alternate" hreflang="sv" href="/sv/contact.html">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+
+<header>
+  <a href="/sv/" class="logo">PDF <span>Häfte</span></a>
+  <nav>
+    <a href="/sv/about.html">Om oss</a>
+    <a href="/sv/policy.html">Policy</a>
+    <a href="/sv/contact.html" class="active">Kontakt</a>
+    <div class="lang-dropdown" id="langDrop">
+      <button class="lang-btn" onclick="toggleLang()">🌐 SV <span class="arrow">▾</span></button>
+      <div class="lang-menu">
+        <a href="/sv/contact.html" class="current">🇸🇪 Svenska</a>
+        <a href="/en/contact.html">🇬🇧 English</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="page-content">
+  <div class="page-label">Kontakt</div>
+  <h1 class="page-title">Hör av <em>dig</em></h1>
+  <!-- ✏️ Byt ut e-postadressen nedan -->
+  <p style="color:var(--muted);font-size:13px;line-height:1.7;margin-bottom:40px;">
+    Har du frågor eller synpunkter? Fyll i formuläret nedan eller skicka ett mail till
+    <a href="mailto:din@epost.se" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(232,197,71,0.3);">din@epost.se</a>.
+  </p>
+  <div class="divider"></div>
+
+  <form class="contact-form" name="kontakt-sv" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleSubmit(event)">
+    <input type="hidden" name="form-name" value="kontakt-sv">
+    <input type="hidden" name="bot-field" style="display:none">
+    <div class="form-row">
+      <div class="field">
+        <label for="name">Namn</label>
+        <input type="text" id="name" name="name" placeholder="Förnamn Efternamn" required>
+      </div>
+      <div class="field">
+        <label for="email">E-post</label>
+        <input type="email" id="email" name="email" placeholder="du@exempel.se" required>
+      </div>
+    </div>
+    <div class="field">
+      <label for="subject">Ämne</label>
+      <input type="text" id="subject" name="subject" placeholder="Vad gäller det?">
+    </div>
+    <div class="field">
+      <label for="message">Meddelande</label>
+      <textarea id="message" name="message" placeholder="Skriv ditt meddelande här…" required></textarea>
+    </div>
+    <button type="submit" class="submit-btn">Skicka meddelande →</button>
+    <div class="success-msg" id="successMsg">✓ Tack för ditt meddelande! Vi återkommer så snart vi kan.</div>
+  </form>
+</div>
+
+<footer>
+  <a href="/sv/" class="footer-logo">PDF <span>Häfte</span></a>
+  <span class="footer-copy">© 2025</span>
+  <div class="footer-links">
+    <a href="/sv/about.html">Om oss</a>
+    <a href="/sv/policy.html">Policy</a>
+    <a href="/sv/contact.html">Kontakt</a>
+  </div>
+</footer>
+
+<script>
+function toggleLang(){ document.getElementById('langDrop').classList.toggle('open'); }
+document.addEventListener('click',function(e){ if(!document.getElementById('langDrop').contains(e.target)) document.getElementById('langDrop').classList.remove('open'); });
+function handleSubmit(e){
+  if(window.location.hostname==='localhost'||window.location.protocol==='file:'){
+    e.preventDefault(); document.getElementById('successMsg').classList.add('visible'); e.target.reset();
+  }
+}
+</script>
+</body>
+</html>
