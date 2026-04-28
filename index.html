@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PDF Häfte</title>
+<title>PDF Editor</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -467,19 +467,23 @@
 
 <header>
   <div class="logo">PDF <span>Häfte</span></div>
-  <div class="header-meta">Ladda upp · Sortera · Exportera — allt i webbläsaren</div>
+  <nav style="display:flex; gap:20px; margin-left:auto;">
+  <a href="/about" style="color:var(--muted); text-decoration:none; font-size:11px;">About Us</a>
+  <a href="/policy" style="color:var(--muted); text-decoration:none; font-size:11px;">Policy</a>
+  <a href="/contact" style="color:var(--muted); text-decoration:none; font-size:11px;">Contact</a>
+</nav>
 </header>
 
 <div class="app">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">PDF-filer</div>
+      <div class="sidebar-title">PDF-files</div>
       <div class="upload-zone" id="uploadZone">
         <input type="file" id="fileInput" accept=".pdf" multiple>
         <div class="upload-icon">📄</div>
         <div class="upload-label">
-          <strong>Klicka eller dra PDF-filer hit</strong><br>
-          Max 30 filer · Bearbetas lokalt
+          <strong>Choose or drag PDF-files to here</strong><br>
+          Max 30 files · (Working locally)
         </div>
         <div class="progress-wrap">
           <div class="progress-bar" id="progressBar">
@@ -488,41 +492,54 @@
           <div class="progress-label" id="progressLabel"></div>
         </div>
       </div>
-      <div class="file-count-badge" id="fileCountBadge">0 / 30 filer uppladdade</div>
+      <div class="file-count-badge" id="fileCountBadge">0 / 30 files uploaded</div>
     </div>
     <div class="file-list" id="fileList"></div>
   </aside>
 
   <main class="main">
     <div class="toolbar">
-      <span class="toolbar-label">Välj</span>
-      <button class="btn" onclick="selectAll()">Alla</button>
-      <button class="btn" onclick="selectNone()">Ingen</button>
-      <button class="btn btn-danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>Radera markerade</button>
+      <span class="toolbar-label">Choose</span>
+      <button class="btn" onclick="selectAll()">All</button>
+      <button class="btn" onclick="selectNone()">None</button>
+      <button class="btn btn-danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>Delete Selected</button>
       <span class="page-count-info">
-        Totalt <strong id="totalPageCount">0</strong> sidor
+        Total <strong id="totalPageCount">0</strong> pages
       </span>
       <button class="btn btn-primary" id="generateBtn" onclick="generatePdf()" disabled>
-        ⬇ Ladda ner häfte
+        ⬇ Download New PDF-file
       </button>
     </div>
 
     <div class="page-canvas" id="pageCanvas">
       <div class="empty-state" id="emptyState">
         <div class="empty-icon">📂</div>
-        <div class="empty-title">Inga sidor ännu</div>
-        <div class="empty-sub">Ladda upp PDF-filer i panelen till vänster</div>
+        <div class="empty-title">No pages yet</div>
+        <div class="empty-sub">Upload PDF-files in the panel to the left</div>
       </div>
       <div class="pages-grid" id="pagesGrid" style="display:none;"></div>
     </div>
   </main>
 </div>
+</main>        
+</div>          
+<footer style="border-top:1px solid var(--border); padding:16px 32px; display:flex; gap:24px; justify-content:center;">
+  <a href="/about" style="color:var(--muted); text-decoration:none; font-size:11px;">About Us</a>
+  <a href="/policy" style="color:var(--muted); text-decoration:none; font-size:11px;">Policy</a>
+  <a href="/contact" style="color:var(--muted); text-decoration:none; font-size:11px;">Contact</a>
+</footer>
 
+<footer style="...">
+  ...
+</footer>
+
+<div class="toast-container" ...>   
+<div class="loading-overlay" ...>
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Bearbetar...</div>
+  <div class="loading-text" id="loadingText">Loading...</div>
   <div class="loading-sub" id="loadingSub"></div>
 </div>
 
@@ -836,7 +853,7 @@ async function generatePdf() {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'hafte.pdf';
+    a.download = 'NEWPDF.pdf';
     document.body.appendChild(a);
     a.click();
     a.remove();
