@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create page — PDF Cleaner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<link rel="stylesheet" id="themeStylesheet" href="" data-light-href="../home-light.css">
+<style>
+  .editor-layout { display: grid; grid-template-columns: 260px 1fr 260px; flex: 1; min-height: 0; height: calc(100vh - 61px); }
+
+  /* ── Left panel ── */
+  .panel { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-right { border-right: none; border-left: 1px solid var(--border); }
+  .panel-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .panel-title { font-family: 'Fraunces', serif; font-size: 12px; font-weight: 300; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+
+  /* ── Tool buttons ── */
+  .tool-btn {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: var(--radius);
+    cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px;
+    transition: all 0.15s; margin-bottom: 8px; text-align: left;
+  }
+  .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tool-btn .tool-icon { font-size: 16px; flex-shrink: 0; }
+  .tool-btn .tool-label { flex: 1; }
+  .tool-btn .tool-sub { font-size: 9px; color: var(--muted); margin-top: 1px; }
+
+  /* ── Canvas area ── */
+  .canvas-area { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 32px 24px; overflow-y: auto; background: #1a1916; gap: 16px; }
+
+  .canvas-wrap { position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
+
+  #pageCanvas {
+    display: block;
+    background: white;
+    cursor: crosshair;
+  }
+
+  .canvas-toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 12px; width: 100%; max-width: 595px;
+  }
+
+  .c-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 5px 11px; border-radius: var(--radius); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; transition: all 0.15s; white-space: nowrap; }
+  .c-btn:hover { background: var(--border); }
+  .c-btn.active { background: var(--accent); border-color: var(--accent); color: #0f0e0c; }
+  .c-btn-primary { background: var(--accent); border-color: var(--accent); color: #0f0e0c; font-weight: 500; }
+  .c-btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  /* ── Right panel - properties ── */
+  .prop-section { margin-bottom: 20px; }
+  .prop-title { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+  .prop-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .prop-label { font-size: 10px; color: var(--muted); }
+  .prop-input { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 7px 10px; outline: none; width: 100%; transition: border-color 0.15s; }
+  .prop-input:focus { border-color: var(--accent); }
+  .prop-range { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .color-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .color-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; flex-shrink: 0; }
+  .color-swatch:hover, .color-swatch.active { border-color: var(--accent); }
+  .color-custom { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border); cursor: pointer; overflow: hidden; padding: 0; background: none; }
+  .color-custom input { width: 100%; height: 100%; border: none; padding: 0; cursor: pointer; opacity: 0; position: absolute; }
+
+  .element-list { display: flex; flex-direction: column; gap: 4px; }
+  .element-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--surface2); border: 1px solid transparent; border-radius: var(--radius); cursor: pointer; font-size: 11px; transition: all 0.15s; }
+  .element-item:hover { border-color: var(--border); }
+  .element-item.selected { border-color: var(--accent); background: rgba(232,197,71,0.06); }
+  .element-icon { font-size: 13px; flex-shrink: 0; }
+  .element-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-size: 10px; }
+  .element-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0 2px; opacity: 0; transition: opacity 0.15s, color 0.15s; }
+  .element-item:hover .element-del { opacity: 1; }
+  .element-del:hover { color: var(--danger); }
+
+  .download-section { padding: 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .download-btn { width: 100%; background: var(--accent); border: 1px solid var(--accent); color: #0f0e0c; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 11px; border-radius: var(--radius); cursor: pointer; transition: all 0.15s; }
+  .download-btn:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  /* Text input overlay */
+  #textOverlay { position: absolute; display: none; z-index: 10; }
+  #textInput { border: 1.5px dashed var(--accent); background: rgba(232,197,71,0.05); outline: none; resize: none; font-family: sans-serif; padding: 4px; min-width: 80px; min-height: 30px; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/en/" class="logo">PDF <span>Cleaner</span></a>
+  <a href="/en/editor.html" style="margin-left:12px;background:rgba(232,197,71,0.1);border:1px solid var(--accent);color:var(--accent);text-decoration:none;padding:6px 12px;border-radius:var(--radius);font-size:11px;font-family:'DM Mono',monospace;">✏️ Create page</a>
+  <nav>
+    <a href="/en/about">About</a>
+    <a href="/en/policy">Policy</a>
+    <a href="/en/contact">Contact</a>
+    <div class="lang-dropdown" id="langDrop">
+      <button class="lang-btn" onclick="toggleLang()">🌐 EN <span class="arrow">▾</span></button>
+      <div class="lang-menu">
+        <a href="/sv/editor">🇸🇪 Svenska</a>
+        <a href="/en/editor" class="current">🇬🇧 English</a>
+      </div>
+    </div>
+    <!-- Theme button -->
+    <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Change theme">
+      <span id="themeIcon">☀️</span> <span id="themeLabel">Light</span>
+    </button>
+  </nav>
+</header>
+
+<div class="editor-layout">
+
+  <!-- Left: tools -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">Tools</div></div>
+    <div class="panel-body">
+
+      <button class="tool-btn" onclick="setTool('text')">
+        <span class="tool-icon">T</span>
+        <div>
+          <div class="tool-label">Add text</div>
+          <div class="tool-sub">Click on the page to place</div>
+        </div>
+      </button>
+
+      <button class="tool-btn" onclick="triggerImageUpload()">
+        <span class="tool-icon">🖼</span>
+        <div>
+          <div class="tool-label">Add image</div>
+          <div class="tool-sub">JPG, PNG, GIF</div>
+        </div>
+      </button>
+      <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="addImage(event)">
+
+      <button class="tool-btn" onclick="setTool('rect')">
+        <span class="tool-icon">▭</span>
+        <div>
+          <div class="tool-label">Draw rectangle</div>
+          <div class="tool-sub">Drag on the page</div>
+        </div>
+      </button>
+
+      <button class="tool-btn" onclick="setTool('line')">
+        <span class="tool-icon">╱</span>
+        <div>
+          <div class="tool-label">Draw line</div>
+          <div class="tool-sub">Drag on the page</div>
+        </div>
+      </button>
+
+      <button class="tool-btn" onclick="setTool('select')">
+        <span class="tool-icon">↖</span>
+        <div>
+          <div class="tool-label">Select & move</div>
+          <div class="tool-sub">Click and drag elements</div>
+        </div>
+      </button>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:8px 0;">
+
+      <button class="tool-btn" onclick="clearAll()" style="border-color:var(--danger);color:var(--danger);">
+        <span class="tool-icon">🗑</span>
+        <div>
+          <div class="tool-label">Clear all</div>
+        </div>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Center: canvas -->
+  <div class="canvas-area">
+    <div class="canvas-toolbar">
+      <span style="font-size:10px;color:var(--muted);">Tools:</span>
+      <button class="c-btn" id="toolSelect" onclick="setTool('select')">↖ Select</button>
+      <button class="c-btn" id="toolText" onclick="setTool('text')">T Text</button>
+      <button class="c-btn" id="toolRect" onclick="setTool('rect')">▭ Rectangle</button>
+      <button class="c-btn" id="toolLine" onclick="setTool('line')">╱ Line</button>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">A4 · 595×842 px</span>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="pageCanvas" width="595" height="842"></canvas>
+      <div id="textOverlay">
+        <textarea id="textInput" rows="2" cols="20"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: properties + layers -->
+  <div class="panel panel-right">
+    <div class="panel-header"><div class="panel-title">Properties</div></div>
+    <div class="panel-body">
+
+      <div class="prop-section">
+        <div class="prop-title">Background color</div>
+        <div class="color-row" id="bgColors">
+          <div class="color-swatch active" style="background:#ffffff;" data-color="#ffffff" onclick="setBg(this)"></div>
+          <div class="color-swatch" style="background:#f5f0e8;" data-color="#f5f0e8" onclick="setBg(this)"></div>
+          <div class="color-swatch" style="background:#0f0e0c;" data-color="#0f0e0c" onclick="setBg(this)"></div>
+          <div class="color-swatch" style="background:#1a3a5c;" data-color="#1a3a5c" onclick="setBg(this)"></div>
+          <div class="color-swatch" style="background:#2d4a1e;" data-color="#2d4a1e" onclick="setBg(this)"></div>
+          <div class="color-swatch" style="background:#e8c547;" data-color="#e8c547" onclick="setBg(this)"></div>
+          <label class="color-custom" title="Choose custom color">
+            <span>+</span>
+            <input type="color" id="bgColorPicker" oninput="setBgCustom(this.value)" style="position:absolute;opacity:0;width:22px;height:22px;cursor:pointer;">
+          </label>
+        </div>
+      </div>
+
+      <div class="prop-section" id="textProps" style="display:none;">
+        <div class="prop-title">Text</div>
+        <div class="prop-row">
+          <div class="prop-label">Size</div>
+          <input type="range" class="prop-range" id="fontSize" min="8" max="96" value="20" oninput="updateSelectedProp('fontSize',+this.value);document.getElementById('fontSizeVal').textContent=this.value+'px'">
+          <span id="fontSizeVal" style="font-size:10px;color:var(--muted);">20px</span>
+        </div>
+        <div class="prop-row">
+          <div class="prop-label">Color</div>
+          <div class="color-row" id="textColors">
+            <div class="color-swatch active" style="background:#000000;border-color:var(--accent);" data-color="#000000" onclick="setTextColor(this)"></div>
+            <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff" onclick="setTextColor(this)"></div>
+            <div class="color-swatch" style="background:#e8c547;" data-color="#e8c547" onclick="setTextColor(this)"></div>
+            <div class="color-swatch" style="background:#d44f3a;" data-color="#d44f3a" onclick="setTextColor(this)"></div>
+            <div class="color-swatch" style="background:#1a3a5c;" data-color="#1a3a5c" onclick="setTextColor(this)"></div>
+            <label class="color-custom" title="Choose color">
+              <span>+</span>
+              <input type="color" id="textColorPicker" oninput="setTextColorCustom(this.value)" style="position:absolute;opacity:0;width:22px;height:22px;cursor:pointer;">
+            </label>
+          </div>
+        </div>
+        <div class="prop-row">
+          <div class="prop-label">Style</div>
+          <div style="display:flex;gap:6px;">
+            <button class="c-btn" id="boldBtn" onclick="toggleBold()" style="font-weight:700;">B</button>
+            <button class="c-btn" id="italicBtn" onclick="toggleItalic()" style="font-style:italic;">I</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prop-section" id="shapeProps" style="display:none;">
+        <div class="prop-title">Shape</div>
+        <div class="prop-row">
+          <div class="prop-label">Fill color</div>
+          <div class="color-row" id="fillColors">
+            <div class="color-swatch" style="background:transparent;border:1px dashed var(--muted);" data-color="transparent" onclick="setFill(this)"></div>
+            <div class="color-swatch active" style="background:#e8c547;" data-color="#e8c547" onclick="setFill(this)"></div>
+            <div class="color-swatch" style="background:#d44f3a;" data-color="#d44f3a" onclick="setFill(this)"></div>
+            <div class="color-swatch" style="background:#000000;" data-color="#000000" onclick="setFill(this)"></div>
+            <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff" onclick="setFill(this)"></div>
+            <label class="color-custom" title="Choose color">
+              <span>+</span>
+              <input type="color" id="fillColorPicker" oninput="setFillCustom(this.value)" style="position:absolute;opacity:0;width:22px;height:22px;cursor:pointer;">
+            </label>
+          </div>
+        </div>
+        <div class="prop-row">
+          <div class="prop-label">Border</div>
+          <div class="color-row" id="strokeColors">
+            <div class="color-swatch active" style="background:transparent;border:1px dashed var(--muted);" data-color="transparent" onclick="setStroke(this)"></div>
+            <div class="color-swatch" style="background:#000000;" data-color="#000000" onclick="setStroke(this)"></div>
+            <div class="color-swatch" style="background:#e8c547;" data-color="#e8c547" onclick="setStroke(this)"></div>
+          </div>
+        </div>
+        <div class="prop-row">
+          <div class="prop-label">Thickness</div>
+          <input type="range" class="prop-range" id="strokeWidth" min="0" max="20" value="0" oninput="updateSelectedProp('strokeWidth',+this.value)">
+        </div>
+      </div>
+
+      <div class="prop-section">
+        <div class="prop-title">Layers (<span id="layerCount">0</span>)</div>
+        <div class="element-list" id="elementList"></div>
+      </div>
+
+    </div>
+
+    <div class="download-section">
+      <button class="download-btn" onclick="addPageToMainPdf()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);margin-bottom:8px;">+ Add page to PDF builder</button>
+      <button class="download-btn" onclick="downloadPage()">⬇ Download page as PDF</button>
+      <div id="addPageMsg" style="display:none;margin-top:8px;font-size:10px;color:var(--success);text-align:center;"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="/en/" class="footer-logo">PDF <span>Cleaner</span></a>
+  <span class="footer-copy">© 2026</span>
+  <div class="footer-links">
+    <a href="/en/about">About</a>
+    <a href="/en/policy">Policy</a>
+    <a href="/en/contact">Contact</a>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+// ── State ──
+const canvas = document.getElementById('pageCanvas');
+const ctx = canvas.getContext('2d');
+
+let tool = 'select';
+let elements = [];
+let selectedEl = null;
+let bgColor = '#ffffff';
+let currentTextColor = '#000000';
+let currentFontSize = 20;
+let currentBold = false;
+let currentItalic = false;
+let currentFill = '#e8c547';
+let currentStroke = 'transparent';
+let currentStrokeWidth = 0;
+
+// Drag state
+let isDragging = false, isDrawing = false;
+let dragOffX = 0, dragOffY = 0;
+let drawStart = {x:0, y:0};
+
+// ── Tool selection ──
+function setTool(t) {
+  tool = t;
+  ['select','text','rect','line'].forEach(id => {
+    const btn = document.getElementById('tool'+id.charAt(0).toUpperCase()+id.slice(1));
+    if(btn) btn.classList.toggle('active', id===t);
+  });
+  canvas.style.cursor = t==='select' ? 'default' : 'crosshair';
+  hideTextOverlay();
+}
+
+setTool('select');
+
+// ── Render ──
+function render() {
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  elements.forEach((el, i) => {
+    ctx.save();
+    if(el.type === 'text') {
+      ctx.fillStyle = el.color || '#000';
+      let fontStr = '';
+      if(el.italic) fontStr += 'italic ';
+      if(el.bold) fontStr += 'bold ';
+      fontStr += `${el.fontSize||20}px sans-serif`;
+      ctx.font = fontStr;
+      ctx.fillText(el.text, el.x, el.y + (el.fontSize||20));
+    } else if(el.type === 'rect') {
+      if(el.fill && el.fill !== 'transparent') { ctx.fillStyle = el.fill; ctx.fillRect(el.x, el.y, el.w, el.h); }
+      if(el.stroke && el.stroke !== 'transparent' && el.strokeWidth > 0) {
+        ctx.strokeStyle = el.stroke; ctx.lineWidth = el.strokeWidth;
+        ctx.strokeRect(el.x, el.y, el.w, el.h);
+      }
+    } else if(el.type === 'line') {
+      ctx.strokeStyle = el.stroke||'#000'; ctx.lineWidth = el.strokeWidth||2;
+      ctx.beginPath(); ctx.moveTo(el.x, el.y); ctx.lineTo(el.x2, el.y2); ctx.stroke();
+    } else if(el.type === 'image') {
+      ctx.drawImage(el.img, el.x, el.y, el.w, el.h);
+    }
+    // Selection highlight
+    if(el === selectedEl) {
+      ctx.strokeStyle = '#e8c547'; ctx.lineWidth = 1.5;
+      ctx.setLineDash([4,3]);
+      const bb = getBounds(el);
+      ctx.strokeRect(bb.x-3, bb.y-3, bb.w+6, bb.h+6);
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  });
+}
+
+function getBounds(el) {
+  if(el.type==='text') {
+    ctx.font = `${el.fontSize||20}px sans-serif`;
+    const w = ctx.measureText(el.text).width;
+    return {x:el.x, y:el.y, w, h:el.fontSize||20};
+  } else if(el.type==='line') {
+    return {x:Math.min(el.x,el.x2), y:Math.min(el.y,el.y2), w:Math.abs(el.x2-el.x)||4, h:Math.abs(el.y2-el.y)||4};
+  }
+  return {x:el.x, y:el.y, w:el.w||100, h:el.h||40};
+}
+
+function hitTest(el, mx, my) {
+  const b = getBounds(el);
+  return mx >= b.x-4 && mx <= b.x+b.w+4 && my >= b.y-4 && my <= b.y+b.h+4;
+}
+
+// ── Canvas events ──
+canvas.addEventListener('mousedown', e => {
+  const {x, y} = canvasPos(e);
+  hideTextOverlay();
+
+  if(tool === 'select') {
+    selectedEl = null;
+    for(let i=elements.length-1; i>=0; i--) {
+      if(hitTest(elements[i], x, y)) { selectedEl = elements[i]; break; }
+    }
+    if(selectedEl) { isDragging=true; dragOffX=x-selectedEl.x; dragOffY=y-selectedEl.y; }
+    updatePropsPanel();
+    render(); renderLayers();
+  } else if(tool === 'text') {
+    showTextOverlay(x, y);
+  } else if(tool==='rect' || tool==='line') {
+    isDrawing=true; drawStart={x,y};
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const {x, y} = canvasPos(e);
+  if(isDragging && selectedEl) {
+    selectedEl.x = x-dragOffX;
+    selectedEl.y = y-dragOffY;
+    if(selectedEl.type==='line') { const dx=selectedEl.x2-selectedEl.x+dragOffX; selectedEl.x2=selectedEl.x+dx; selectedEl.y2 = y-dragOffY + (selectedEl.y2-(selectedEl.y+dragOffY)); }
+    render();
+  }
+  if(isDrawing) {
+    render();
+    ctx.strokeStyle='#e8c547'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    if(tool==='rect') ctx.strokeRect(drawStart.x, drawStart.y, x-drawStart.x, y-drawStart.y);
+    else if(tool==='line') { ctx.beginPath(); ctx.moveTo(drawStart.x,drawStart.y); ctx.lineTo(x,y); ctx.stroke(); }
+    ctx.setLineDash([]);
+  }
+});
+
+canvas.addEventListener('mouseup', e => {
+  const {x, y} = canvasPos(e);
+  if(isDragging) { isDragging=false; renderLayers(); }
+  if(isDrawing) {
+    isDrawing=false;
+    const w=x-drawStart.x, h=y-drawStart.y;
+    if(tool==='rect' && (Math.abs(w)>4||Math.abs(h)>4)) {
+      elements.push({type:'rect', x:Math.min(drawStart.x,x), y:Math.min(drawStart.y,y), w:Math.abs(w), h:Math.abs(h), fill:currentFill, stroke:currentStroke, strokeWidth:currentStrokeWidth});
+    } else if(tool==='line') {
+      elements.push({type:'line', x:drawStart.x, y:drawStart.y, x2:x, y2:y, stroke:currentStroke==='transparent'?'#000':currentStroke, strokeWidth:currentStrokeWidth||2});
+    }
+    render(); renderLayers();
+    setTool('select');
+  }
+});
+
+function canvasPos(e) {
+  const r=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/r.width, scaleY=canvas.height/r.height;
+  return {x:(e.clientX-r.left)*scaleX, y:(e.clientY-r.top)*scaleY};
+}
+
+// ── Text overlay ──
+function showTextOverlay(cx, cy) {
+  const r=canvas.getBoundingClientRect();
+  const scaleX=r.width/canvas.width, scaleY=r.height/canvas.height;
+  const wrap=document.getElementById('textOverlay');
+  const inp=document.getElementById('textInput');
+  wrap.style.display='block';
+  wrap.style.left=(canvas.offsetLeft + cx*scaleX)+'px';
+  wrap.style.top=(canvas.offsetTop + cy*scaleY - 4)+'px';
+  inp.style.fontSize=(currentFontSize*scaleY)+'px';
+  inp.style.color=currentTextColor;
+  inp.style.fontWeight=currentBold?'bold':'normal';
+  inp.style.fontStyle=currentItalic?'italic':'normal';
+  inp.value='';
+  inp.focus();
+  inp._cx=cx; inp._cy=cy;
+}
+
+function hideTextOverlay() {
+  const inp=document.getElementById('textInput');
+  const wrap=document.getElementById('textOverlay');
+  if(wrap.style.display==='none') return;
+  const txt=inp.value.trim();
+  if(txt) {
+    elements.push({type:'text', x:inp._cx, y:inp._cy, text:txt, fontSize:currentFontSize, color:currentTextColor, bold:currentBold, italic:currentItalic});
+    render(); renderLayers();
+  }
+  wrap.style.display='none';
+}
+
+document.getElementById('textInput').addEventListener('keydown', e => {
+  if(e.key==='Escape') { document.getElementById('textOverlay').style.display='none'; }
+  if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); hideTextOverlay(); }
+});
+
+// ── Image upload ──
+function triggerImageUpload() { document.getElementById('imgUpload').click(); }
+function addImage(ev) {
+  const file=ev.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=re=>{
+    const img=new Image();
+    img.onload=()=>{
+      const maxW=400, maxH=500;
+      let w=img.width, h=img.height;
+      if(w>maxW){h=h*(maxW/w);w=maxW;}
+      if(h>maxH){w=w*(maxH/h);h=maxH;}
+      elements.push({type:'image',img,x:50,y:50,w,h});
+      render(); renderLayers(); setTool('select');
+    };
+    img.src=re.target.result;
+  };
+  reader.readAsDataURL(file);
+  ev.target.value='';
+}
+
+// ── Background ──
+function setBg(el) {
+  document.querySelectorAll('#bgColors .color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  bgColor=el.dataset.color; render();
+}
+function setBgCustom(v){ bgColor=v; render(); }
+
+// ── Text props ──
+function setTextColor(el) {
+  document.querySelectorAll('#textColors .color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  currentTextColor=el.dataset.color;
+  if(selectedEl&&selectedEl.type==='text'){ selectedEl.color=currentTextColor; render(); }
+}
+function setTextColorCustom(v){ currentTextColor=v; if(selectedEl&&selectedEl.type==='text'){selectedEl.color=v;render();} }
+function toggleBold(){ currentBold=!currentBold; document.getElementById('boldBtn').classList.toggle('active',currentBold); if(selectedEl&&selectedEl.type==='text'){selectedEl.bold=currentBold;render();} }
+function toggleItalic(){ currentItalic=!currentItalic; document.getElementById('italicBtn').classList.toggle('active',currentItalic); if(selectedEl&&selectedEl.type==='text'){selectedEl.italic=currentItalic;render();} }
+
+// ── Shape props ──
+function setFill(el) {
+  document.querySelectorAll('#fillColors .color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  currentFill=el.dataset.color;
+  if(selectedEl&&(selectedEl.type==='rect')){selectedEl.fill=currentFill;render();}
+}
+function setFillCustom(v){ currentFill=v; if(selectedEl&&selectedEl.type==='rect'){selectedEl.fill=v;render();} }
+function setStroke(el) {
+  document.querySelectorAll('#strokeColors .color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  currentStroke=el.dataset.color;
+  if(selectedEl){selectedEl.stroke=currentStroke;render();}
+}
+function setStrokeCustom(v){ currentStroke=v; if(selectedEl){selectedEl.stroke=v;render();} }
+
+document.getElementById('fontSize').addEventListener('input',function(){
+  currentFontSize=+this.value;
+  if(selectedEl&&selectedEl.type==='text'){selectedEl.fontSize=currentFontSize;render();}
+});
+document.getElementById('strokeWidth').addEventListener('input',function(){
+  currentStrokeWidth=+this.value;
+  if(selectedEl){selectedEl.strokeWidth=currentStrokeWidth;render();}
+});
+
+function updateSelectedProp(k,v){ if(selectedEl){selectedEl[k]=v;render();} }
+
+function updatePropsPanel() {
+  document.getElementById('textProps').style.display = (selectedEl&&selectedEl.type==='text')?'block':'none';
+  document.getElementById('shapeProps').style.display = (selectedEl&&(selectedEl.type==='rect'||selectedEl.type==='line'))?'block':'none';
+  if(selectedEl&&selectedEl.type==='text'){
+    document.getElementById('fontSize').value=selectedEl.fontSize||20;
+    document.getElementById('fontSizeVal').textContent=(selectedEl.fontSize||20)+'px';
+  }
+}
+
+// ── Layers ──
+function renderLayers() {
+  const list=document.getElementById('elementList');
+  document.getElementById('layerCount').textContent=elements.length;
+  list.innerHTML='';
+  [...elements].reverse().forEach((el,ri)=>{
+    const i=elements.length-1-ri;
+    const icons={text:'T',rect:'▭',line:'╱',image:'🖼'};
+    const names={text:`"${el.text.slice(0,16)}${el.text.length>16?'…':''}"`,rect:'Rectangle',line:'Line',image:'Image'};
+    const item=document.createElement('div');
+    item.className='element-item'+(el===selectedEl?' selected':'');
+    item.innerHTML=`<span class="element-icon">${icons[el.type]||'?'}</span><span class="element-name">${names[el.type]||el.type}</span><button class="element-del" onclick="deleteEl(${i},event)">✕</button>`;
+    item.addEventListener('click',e=>{ if(e.target.classList.contains('element-del'))return; selectedEl=elements[i]; updatePropsPanel(); render(); renderLayers(); });
+    list.appendChild(item);
+  });
+}
+
+function deleteEl(i,e){ e.stopPropagation(); elements.splice(i,1); if(selectedEl===elements[i])selectedEl=null; render(); renderLayers(); }
+function clearAll(){ if(confirm('Clear the entire page?')){ elements=[]; selectedEl=null; render(); renderLayers(); } }
+
+// ── Download as PDF ──
+async function downloadPage() {
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  const page = pdfDoc.addPage([595, 842]);
+  const pngImage = await pdfDoc.embedPng(dataUrl);
+  page.drawImage(pngImage, {x:0, y:0, width:595, height:842});
+  const bytes = await pdfDoc.save();
+  const blob = new Blob([bytes],{type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='page.pdf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+// ── Add page to main PDF builder via sessionStorage ──
+async function addPageToMainPdf() {
+  try {
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+    // Build a single-page PDF from the canvas
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const pg = pdfDoc.addPage([595, 842]);
+    const pngImage = await pdfDoc.embedPng(dataUrl);
+    pg.drawImage(pngImage, {x:0, y:0, width:595, height:842});
+    const bytes = await pdfDoc.save();
+
+    // Convert to base64 and store so the main page can pick it up
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(bytes)));
+    const existing = JSON.parse(sessionStorage.getItem('editorPages') || '[]');
+    existing.push({ base64, name: 'Created page ' + (existing.length + 1) });
+    sessionStorage.setItem('editorPages', JSON.stringify(existing));
+
+    const msg = document.getElementById('addPageMsg');
+    msg.textContent = '✓ Page added! Go to the PDF builder to see it.';
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// Initial render
+render();
+</script>
+<script src="../shared.js"></script>
+</body>
+</html>

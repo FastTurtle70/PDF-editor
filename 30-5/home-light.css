@@ -1,0 +1,39 @@
+/*
+  home-light.css
+  Ljust tema för PDF Cleaner
+  Endast variabelblock + stilar som inte kan hanteras av variabler.
+*/
+
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #ddd9d0;
+  --accent: #b8891a;
+  --accent2: #9a7014;
+  --text: #1a1814;
+  --muted: #6b6560;
+  --danger: #c0392b;
+  --success: #2e7d5a;
+  --radius: 6px;
+}
+
+/* Skuggan är hårdkodad — kan inte hanteras av variabel */
+.lang-menu {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Gradientfärgen är hårdkodad */
+.btn-grid-item::before {
+  background: linear-gradient(135deg, rgba(184,137,26,0.04) 0%, transparent 60%);
+}
+
+/* Länkunderstrykningens färg är hårdkodad */
+.page-body a {
+  border-bottom-color: rgba(184,137,26,0.3);
+}
+
+/* submit-btn har vit text i ljust läge, svart i mörkt */
+.submit-btn {
+  color: #ffffff;
+}

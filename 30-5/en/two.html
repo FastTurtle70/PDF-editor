@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorry! — PDF Cleaner</title>
+<link rel="stylesheet" href="../shared.css">
+<link rel="stylesheet" id="themeStylesheet" href="" data-light-href="../home-light.css">
+</head>
+<body>
+
+<header>
+  <a href="/en/" class="logo">PDF <span>Cleaner</span></a>
+  <nav>
+    <a href="/en/about">About</a>
+    <a href="/en/policy">Policy</a>
+    <a href="/en/contact">Contact</a>
+    <div class="lang-dropdown" id="langDrop">
+      <button class="lang-btn" onclick="toggleLang()">🌐 EN <span class="arrow">▾</span></button>
+      <div class="lang-menu">
+        <a href="/sv/two">🇸🇪 Svenska</a>
+        <a href="/en/two" class="current">🇬🇧 English</a>
+      </div>
+    </div>
+    <!-- Theme button -->
+    <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Change theme">
+      <span id="themeIcon">☀️</span> <span id="themeLabel">Light</span>
+    </button>
+  </nav>
+</header>
+
+<div class="page-content" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height: 60vh;">
+  <div style="font-size: 48px; margin-bottom: 24px;">❌</div>
+  <div class="page-label">We're sorry!</div>
+  <h1 class="page-title" style="margin-bottom: 16px;">Unfortunately this feature<br><em>is not yet working</em></h1>
+  <p style="color: var(--muted); font-size: 13px; line-height: 1.7; max-width: 420px; margin-bottom: 40px;">
+    We are currently working on the website and doing our best to make this feature available as soon as possible.
+  </p>
+  <a href="/en/" style="background: var(--accent); color: #0f0e0c; text-decoration: none; padding: 12px 28px; border-radius: var(--radius); font-size: 12px; font-weight: 500;">
+    Back to home →
+  </a>
+</div>
+
+<footer>
+  <a href="/en/" class="footer-logo">PDF <span>Cleaner</span></a>
+  <span class="footer-copy">© 2026</span>
+  <div class="footer-links">
+    <a href="/en/about">About</a>
+    <a href="/en/policy">Policy</a>
+    <a href="/en/contact">Contact</a>
+  </div>
+</footer>
+
+<script src="../shared.js"></script>
+</body>
+</html>

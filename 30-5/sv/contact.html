@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — PDF Cleaner</title>
+<link rel="alternate" hreflang="en" href="/en/contact">
+<link rel="alternate" hreflang="sv" href="/sv/contact">
+<link rel="stylesheet" href="../shared.css">
+<link rel="stylesheet" id="themeStylesheet" href="" data-light-href="../home-light.css">
+</head>
+<body>
+
+<header>
+  <a href="/sv/" class="logo">PDF <span>Cleaner</span></a>
+  <nav>
+    <a href="/sv/about">Om oss</a>
+    <a href="/sv/policy">Policy</a>
+    <a href="/sv/contact" class="active">Kontakt</a>
+    <div class="lang-dropdown" id="langDrop">
+      <button class="lang-btn" onclick="toggleLang()">🌐 SV <span class="arrow">▾</span></button>
+      <div class="lang-menu">
+        <a href="/sv/contact" class="current">🇸🇪 Svenska</a>
+        <a href="/en/contact">🇬🇧 English</a>
+      </div>
+    </div>
+<!-- Temaknapp -->
+    <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Byt tema">
+      <span id="themeIcon">☀️</span> <span id="themeLabel">Ljust</span>
+    </button>
+  </nav>
+</header>
+
+<div class="page-content">
+  <div class="page-label">Kontakt</div>
+  <h1 class="page-title">Hör av <em>dig</em></h1>
+  <!-- ✏️ Byt ut e-postadressen nedan -->
+  <p font-size:13px;line-height:1.7;margin-bottom:40px;">
+    Har du frågor eller synpunkter? Fyll i formuläret nedan <strong>(EJ FUNGERADE)</strong> eller skicka ett mail till
+    <a href="mailto:melker.myrberger@gmail.com" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(232,197,71,0.3);">melker.myrberger@gmail.com</a>.
+  </p>
+  <div class="divider"></div>
+
+  <form class="contact-form" name="kontakt-sv" method="POST" action="/sv/tack" data-netlify="true" netlify-honeypot="bot-field">
+    <input type="hidden" name="form-name" value="kontakt-sv">
+    <p style="display:none"><label>Fyll inte i detta: <input name="bot-field"></label></p>
+    <div class="form-row">
+      <div class="field">
+        <label for="name">Namn</label>
+        <input type="text" id="name" name="name" placeholder="Förnamn Efternamn" required>
+      </div>
+      <div class="field">
+        <label for="email">E-post</label>
+        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+      </div>
+    </div>
+    <div class="field">
+      <label for="subject">Ämne</label>
+      <input type="text" id="subject" name="subject" placeholder="Vad gäller det?">
+    </div>
+    <div class="field">
+      <label for="message">Meddelande</label>
+      <textarea id="message" name="message" placeholder="Skriv ditt meddelande här…" required></textarea>
+    </div>
+    <button type="submit" class="submit-btn">Skicka meddelande →</button>
+    <div class="success-msg" id="successMsg">✓ Tack för ditt meddelande! Vi återkommer så snart vi kan.</div>
+  </form>
+</div>
+
+<footer>
+  <a href="/sv/" class="footer-logo">PDF <span>Cleaner</span></a>
+  <span class="footer-copy">© 2026</span>
+  <div class="footer-links">
+    <a href="/sv/about">Om oss</a>
+    <a href="/sv/policy">Policy</a>
+    <a href="/sv/contact">Kontakt</a>
+  </div>
+</footer>
+
+<script src="../shared.js"></script>
+</body>
+</html>
