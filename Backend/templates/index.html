@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Program test</title>
+<link rel="alternate" hreflang="en" href="/en/">
+<link rel="alternate" hreflang="sv" href="/sv/">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<link rel="stylesheet" id="themeStylesheet" href="">
+<style>
+  /* ── Startsida specifik CSS ── */
+
+  main {
+    flex: 1;
+  }
+
+  /* Hero-sektion med knappar */
+  .hero {
+    padding: 72px 48px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-intro {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .hero-label {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  /* Knappgrid */
+  .btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+    margin-bottom: 64px;
+  }
+
+  .btn-grid-item {
+    text-decoration: none;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 28px;
+    background: var(--surface);
+    transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-grid-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(232,197,71,0.03) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-grid-item:hover::before {
+    opacity: 1;
+  }
+
+  .btn-grid-item:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  /* Knapp 1 – vänster, rad 1 */
+  .btn-grid-item:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /* Knapp 2 – höger, rad 1 */
+  .btn-grid-item:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* Knapp 3 – mitten, rad 2 */
+  .btn-grid-item:nth-child(3) {
+    grid-column: 1 / -1;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .btn-grid-label {
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    opacity: 0.8;
+  }
+
+  .btn-grid-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .btn-grid-title em {
+    font-style: italic;
+    font-weight: 700;
+  }
+
+  .btn-grid-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 4px;
+  }
+
+  .btn-grid-arrow {
+    margin-top: auto;
+    padding-top: 16px;
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-grid-item:hover .btn-grid-arrow {
+    opacity: 1;
+  }
+
+  /* Textlabel ovanför knappar */
+  .above-btn-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* Wrapper för knapp + label ovanför */
+  .btn-wrapper {
+    display: contents;
+  }
+
+  /* ── Tre-kolumner sektion ── */
+  .columns-section {
+    padding: 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .three-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+
+  .col-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .col-icon {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .col-card:hover .col-icon {
+    opacity: 1;
+  }
+
+  .col-title {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  .col-text {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  /* Bred text under tre-kolumnerna */
+  .full-width-text {
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.85;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .full-width-text strong {
+    color: var(--text);
+  }
+
+  /* ── Tema-knapp ── */
+  .theme-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  .theme-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* ── Footer med två kolumner ── */
+  footer {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+  }
+
+  .footer-top {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .footer-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .footer-col {
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-col:first-child {
+    border-right: 1px solid var(--border);
+  }
+
+  .footer-col-title {
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .footer-col-text {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .footer-col-text a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-col-text a:hover {
+    color: var(--accent);
+  }
+
+  /* ── Divider ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto 0;
+    padding: 0 48px;
+  }
+
+  .section-divider-inner {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Responsiv ── */
+  @media (max-width: 768px) {
+    .hero { padding: 40px 20px 32px; }
+    .columns-section { padding: 32px 20px; }
+    .btn-grid { grid-template-columns: 1fr; }
+    .btn-grid-item:nth-child(2) { grid-column: 1; grid-row: 2; }
+    .btn-grid-item:nth-child(3) { grid-column: 1; max-width: 100%; }
+    .three-cols { grid-template-columns: 1fr; }
+    .footer-cols { grid-template-columns: 1fr; }
+    .footer-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <a href="/sv/" class="logo">PDF <span>Cleaner</span>.se</a>
+  <a href="/sv/editor.html" style="margin-left:12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:var(--radius);font-size:11px;font-family:'DM Mono',monospace;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✏️ Skapa sida</a>
+  <a href="/sv/converter.html" style="margin-left:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:var(--radius);font-size:11px;font-family:'DM Mono',monospace;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">📁 Skapa PDF från fil</a>
+  <nav>
+    <a href="/sv/about.html">Om oss</a>
+    <a href="/sv/policy.html">Policy</a>
+    <a href="/sv/contact.html">Kontakt</a>
+    <div class="lang-dropdown" id="langDrop">
+      <button class="lang-btn" onclick="toggleLang()">🌐 SV <span class="arrow">▾</span></button>
+      <div class="lang-menu">
+        <a href="/sv/" class="current">🇸🇪 Svenska</a>
+        <a href="/en/">🇬🇧 English</a>
+      </div>
+    </div>
+    <!-- Temaknapp -->
+    <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Byt tema">
+      <span id="themeIcon">☀️</span> <span id="themeLabel">Ljust</span>
+    </button>
+  </nav>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main>
+
+    <p2>Välkommen till vår test sida!</p2>
+
+    <h2>{{msg}} </h2>
+    
+
+</main>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <!-- Övre del av footer med logo, copyright och snabblänkar-->
+  <div class="footer-top">
+    <a href="/sv/" class="footer-logo">PDF <span>Cleaner</span></a>
+    <span class="footer-copy">© 2026</span>
+    <div class="footer-links">
+      <a href="/sv/about.html">Om oss</a>
+      <a href="/sv/policy.html">Policy</a>
+      <a href="/sv/contact.html">Kontakt</a>
+    </div>
+  </div>
+
+  <!-- Undre del – två kolumner med text -->
+  <div class="footer-cols">
+    <div class="footer-col">
+      <div class="footer-col-title">Här ska det stå något</div>
+      <p class="footer-col-text">
+       men än så länge vet vi inte vad.<br><br>
+        <a href="/sv/about.html">Läs mer om oss</a> ·
+        <a href="/sv/contact.html">Kontakta oss</a>
+      </p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Pst! Visste du att...</div>
+      <p class="footer-col-text">
+        vi finns på <a href="https://github.com/FastTurtle70/PDF-editor">github</a>! Kika in koden och släng upp en "pull request" om du känner för det.<br><br>
+        <a href="/sv/policy.html">Integritetspolicy</a> ·
+        <a href="/sv/contact.html">Reviews</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Språkdropdown ──
+function toggleLang() {
+  document.getElementById('langDrop').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const drop = document.getElementById('langDrop');
+  if (drop && !drop.contains(e.target)) drop.classList.remove('open');
+});
+
+// ── Temaväxlare ──
+const THEME_KEY = 'pdfcleaner-theme';
+
+function applyTheme(theme) {
+  const sheet = document.getElementById('themeStylesheet');
+  const btn = document.getElementById('themeToggleBtn');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+
+  if (theme === 'light') {
+    sheet.href = '/home-light.css';
+    icon.textContent = '🌙';
+    label.textContent = 'Mörkt';
+  } else {
+    sheet.href = '';
+    icon.textContent = '☀️';
+    label.textContent = 'Ljust';
+  }
+}
+
+function toggleTheme() {
+  const current = localStorage.getItem(THEME_KEY) || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+}
+
+// Ladda sparat tema vid sidladdning
+(function() {
+  const saved = localStorage.getItem(THEME_KEY) || 'dark';
+  applyTheme(saved);
+})();
+</script>
+
+</body>
+</html>
