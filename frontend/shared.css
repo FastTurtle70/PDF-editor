@@ -605,6 +605,7 @@ footer {
 
   .footer-col-title {
     font-size: 10px;
+    margin: 0;
     color: var(--accent);
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -613,6 +614,7 @@ footer {
 
   .footer-col-text {
     font-size: 11px;
+    margin: 0;
     color: var(--muted);
     line-height: 1.7;
   }
