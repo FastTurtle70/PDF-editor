@@ -30,11 +30,3 @@ To offer a simple, free, and privacy-first web tool for working with PDF files â
 ## Current status
 
 The frontend is functional with a working multi-language setup, a dark/light theme switcher, and several tool pages (page editor, converter, PDF cleaner). The backend exists but is not yet connected to the frontend.
-
-## What I need help with (replace as needed)
-
-> Describe what you want help with in this session, e.g.:
-> - "Implement drag-and-drop for reordering pages in the editor"
-> - "Fix a bug in the PDF merge logic"
-> - "Wire up the Flask backend to a specific frontend feature"
-> - "Improve responsive layout on mobile"

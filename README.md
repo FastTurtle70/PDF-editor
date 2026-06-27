@@ -65,6 +65,17 @@ PDFcleaner/                        (branch: live)
 A Flask backend is present on the server (`backend/test1py.py`) and includes security middleware (Talisman for CSP headers, Flask-Limiter for rate limiting) and a Gunicorn setup for production. It is **not currently connected to the frontend** — all PDF processing happens client-side. The backend exists as groundwork for future server-side features.
 
 ---
+ 
+## Prompts folder
+ 
+The repo includes a set of markdown prompt files (`projectcontext.md`, `architecture.md`) used to quickly bring AI assistants up to speed on the project.
+ 
+These are pasted at the start of a conversation to give the AI relevant context and background — saving time instead of re-explaining the project from scratch each time. Currently used across three tools with different roles:
+ 
+- **Claude** — writing and iterating on code
+- **Gemini** — general help and server-side topics (Nginx config, deployments, installations)
+- **ChatGPT** — discussing the project, exploring future ideas and directions
+---
 
 ## Contributing
 
