@@ -10,8 +10,8 @@ A free, privacy-first web tool for editing PDF files — entirely in the browser
 
 - **Clean one PDF** — reorder or remove pages from a single PDF file
 - **Merge multiple PDFs** — combine several files and manipulate pages across them *(in progress)*
-- **Page editor** — add text, shapes, and other elements to a PDF page
-- **File converter** — convert images and other file types into PDF
+- **Page editor** — add text, shapes, and other elements to a PDF page *(Not currently working)*
+- **File converter** — convert images and other file types into PDF *(Not currently working)*
 - **Dark / light theme** — persisted per browser
 - **Bilingual** — English and Swedish, auto-detected from the browser
 
